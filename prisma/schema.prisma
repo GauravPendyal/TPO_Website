@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  TPO_ADMIN
+  TPO_STAFF
+}
+
+enum PartnershipType {
+  CRT
+  FDP
+  EXTERNAL
+}
+
+enum CollegeStatus {
+  PENDING
+  APPROVED
+}
+
+enum MouStatus {
+  ACTIVE
+  EXPIRED
+  PENDING
+}
+
+enum ProgramType {
+  STUDENT
+  FDP
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  COMPLETED
+}
+
+model User {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  passwordHash   String?
+  role           Role            @default(TPO_STAFF)
+  collegeId      String?
+  college        College?        @relation(fields: [collegeId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  communications Communication[]
+}
+
+model College {
+  id                     String          @id @default(uuid())
+  name                   String
+  university             String?
+  partnershipType        PartnershipType @default(CRT)
+  revenueSharePercentage Float           @default(0.0)
+  status                 CollegeStatus   @default(PENDING)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  users                  User[]
+  mous                   Mou[]
+  students               Student[]
+  communications         Communication[]
+}
+
+model Mou {
+  id          String    @id @default(uuid())
+  collegeId   String
+  college     College   @relation(fields: [collegeId], references: [id])
+  documentUrl String?
+  startDate   DateTime
+  endDate     DateTime
+  status      MouStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Student {
+  id          String       @id @default(uuid())
+  collegeId   String
+  college     College      @relation(fields: [collegeId], references: [id])
+  name        String
+  email       String       @unique
+  gradYear    Int
+  department  String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  enrollments Enrollment[]
+  placements  Placement[]
+}
+
+model Program {
+  id          String       @id @default(uuid())
+  name        String
+  type        ProgramType
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  enrollments Enrollment[]
+}
+
+model Enrollment {
+  id                 String           @id @default(uuid())
+  studentId          String
+  student            Student          @relation(fields: [studentId], references: [id])
+  programId          String
+  program            Program          @relation(fields: [programId], references: [id])
+  progressPercentage Float            @default(0.0)
+  status             EnrollmentStatus @default(ENROLLED)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model Placement {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  companyName String
+  role        String
+  salary      Float?
+  dateOffered DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Communication {
+  id          String    @id @default(uuid())
+  collegeId   String
+  college     College   @relation(fields: [collegeId], references: [id])
+  adminId     String
+  admin       User      @relation(fields: [adminId], references: [id])
+  note        String
+  meetingDate DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
