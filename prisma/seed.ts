@@ -2,7 +2,13 @@ import { PrismaClient, Role, PartnershipType, CollegeStatus, ProgramType } from 
 // Using require to avoid module issues if tsconfig isn't set up perfectly for node yet
 const { hash } = require('bcryptjs')
 
-const prisma = new PrismaClient()
+const { Pool } = require('pg')
+const { PrismaPg } = require('@prisma/adapter-pg')
+
+const connectionString = process.env.DATABASE_URL
+const pool = new Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   console.log('Seeding the database...')
