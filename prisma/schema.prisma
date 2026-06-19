@@ -3,40 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-}
-
-enum Role {
-  SUPER_ADMIN
-  TPO_ADMIN
-  TPO_STAFF
-}
-
-enum PartnershipType {
-  CRT
-  FDP
-  EXTERNAL
-}
-
-enum CollegeStatus {
-  PENDING
-  APPROVED
-}
-
-enum MouStatus {
-  ACTIVE
-  EXPIRED
-  PENDING
-}
-
-enum ProgramType {
-  STUDENT
-  FDP
-}
-
-enum EnrollmentStatus {
-  ENROLLED
-  COMPLETED
+  provider = "sqlite"
 }
 
 model User {
@@ -44,7 +11,7 @@ model User {
   name           String
   email          String          @unique
   passwordHash   String?
-  role           Role            @default(TPO_STAFF)
+  role           String          @default("TPO_STAFF")
   collegeId      String?
   college        College?        @relation(fields: [collegeId], references: [id])
   createdAt      DateTime        @default(now())
@@ -56,9 +23,9 @@ model College {
   id                     String          @id @default(uuid())
   name                   String
   university             String?
-  partnershipType        PartnershipType @default(CRT)
+  partnershipType        String          @default("CRT")
   revenueSharePercentage Float           @default(0.0)
-  status                 CollegeStatus   @default(PENDING)
+  status                 String          @default("PENDING")
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
   users                  User[]
@@ -74,7 +41,7 @@ model Mou {
   documentUrl String?
   startDate   DateTime
   endDate     DateTime
-  status      MouStatus @default(PENDING)
+  status      String    @default("PENDING")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -96,7 +63,7 @@ model Student {
 model Program {
   id          String       @id @default(uuid())
   name        String
-  type        ProgramType
+  type        String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   enrollments Enrollment[]
@@ -109,7 +76,7 @@ model Enrollment {
   programId          String
   program            Program          @relation(fields: [programId], references: [id])
   progressPercentage Float            @default(0.0)
-  status             EnrollmentStatus @default(ENROLLED)
+  status             String           @default("ENROLLED")
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 }

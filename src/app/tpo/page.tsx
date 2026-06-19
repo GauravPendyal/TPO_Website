@@ -20,11 +20,18 @@ export default async function TPODashboard() {
     }),
   ]);
 
+  const college = collegeId ? await prisma.college.findUnique({ where: { id: collegeId } }) : null;
+  const placements = await prisma.placement.findMany({ where: { student: whereClause } });
+  
+  const totalSalaryLPA = placements.reduce((sum, p) => sum + (p.salary || 0), 0);
+  const revenueShare = college?.revenueSharePercentage || 0;
+  const totalRevenue = totalSalaryLPA * 100000 * (revenueShare / 100);
+
   const stats = [
     { label: "Total Students", value: studentsCount, icon: GraduationCap },
     { label: "Successful Placements", value: placementsCount, icon: Briefcase },
-    { label: "Active Offers", value: "0", icon: FileText },
-    { label: "Total Revenue Generated", value: "₹0", icon: IndianRupee },
+    { label: "Active Offers", value: placementsCount.toString(), icon: FileText },
+    { label: "Total Revenue Generated", value: `₹${totalRevenue.toLocaleString('en-IN')}`, icon: IndianRupee },
   ];
 
   return (
