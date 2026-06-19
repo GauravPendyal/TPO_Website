@@ -42,13 +42,13 @@ export default async function FinancePage() {
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statInfo}>
-            <span className={styles.statValue}>₹{totalRevenueGenerated.toLocaleString('en-IN')}</span>
+            <span className={styles.statValue}>Rs. {totalRevenueGenerated.toLocaleString('en-IN')}</span>
             <span className={styles.statLabel}>Total Revenue Generated</span>
           </div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statInfo}>
-            <span className={styles.statValue}>₹{totalRevenueGenerated.toLocaleString('en-IN')}</span>
+            <span className={styles.statValue}>Rs. {totalRevenueGenerated.toLocaleString('en-IN')}</span>
             <span className={styles.statLabel}>Pending Payouts (Est.)</span>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default async function FinancePage() {
                     <td>{p.student.name}</td>
                     <td>{p.companyName}</td>
                     <td>{p.salary || 0}</td>
-                    <td>₹{placementRevenue.toLocaleString('en-IN')}</td>
+                    <td>Rs. {placementRevenue.toLocaleString('en-IN')}</td>
                   </tr>
                 );
               })}

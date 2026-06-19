@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Skill Tank TPO Partner Dashboard
 
-## Getting Started
+Skill Tank is a Next.js B2B SaaS dashboard for college Training and Placement Officers and Skill Tank super admins. It includes role-based authentication, Prisma-backed persistence, seeded demo data, placement tracking, finance views, report exports, and notification hooks for email and Telegram.
 
-First, run the development server:
+## Demo Accounts
+
+All seeded users use the password `password123`.
+
+| Role | Email |
+| --- | --- |
+| Super Admin | `admin@skilltank.com` |
+| TPO Admin | `tpo1@gtu.edu` |
+| TPO Admin | `tpo2@nie.edu` |
+| TPO Admin | `tpo3@fsc.edu` |
+
+## Local Setup
 
 ```bash
+npm install
+npx prisma migrate deploy
+npx prisma db seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+DATABASE_URL="file:./dev.db"
+AUTH_SECRET="replace-with-a-long-random-secret"
+RESEND_API_KEY=""
+TELEGRAM_BOT_TOKEN=""
+TELEGRAM_CHAT_ID=""
+```
 
-## Learn More
+Email and Telegram integrations are safe to run without provider keys. When keys are missing, the app logs stub notifications so demos and builds keep working.
 
-To learn more about Next.js, take a look at the following resources:
+## Production Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For Vercel, configure `DATABASE_URL` with a hosted SQL/libSQL database instead of a local file database. A local SQLite file works for development but is not persistent in serverless production.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+After configuring environment variables on Vercel, run:
 
-## Deploy on Vercel
+```bash
+npx prisma migrate deploy
+npx prisma db seed
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Super admin and TPO admin authentication with protected routes.
+- Admin college/TPO dashboards and college onboarding.
+- TPO student roster management and placement recording.
+- Revenue-share finance dashboard.
+- MOU renewal alerts for agreements expiring within 30 days.
+- Placement summary CSV/PDF exports and cohort performance CSV export.
+- Resend email and Telegram bot notification hooks.
+- Seeder with 3 colleges, 3 TPOs, 60 students, enrollments, MOUs, communications, and 24 placements.

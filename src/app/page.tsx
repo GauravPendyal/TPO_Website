@@ -1,8 +1,13 @@
 import { Shield, ArrowRight } from "lucide-react";
 import styles from "./page.module.css";
 import { signIn } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+
+export default async function Home(props: { searchParams?: Promise<{ error?: string }> }) {
+  const searchParams = await props.searchParams;
+  const hasError = searchParams?.error === "invalid";
+
   return (
     <main className={styles.hero}>
       <div className={`${styles.content} glass-panel`}>
@@ -11,12 +16,31 @@ export default function Home() {
         </div>
         <h1 className={styles.title}>Skill Tank</h1>
         <p className={styles.subtitle}>Partner & Placement Management</p>
+        
+        {hasError && (
+          <p style={{ color: "red", fontSize: "0.9rem", textAlign: "center", marginBottom: "1rem" }}>
+            Invalid email or password. Please try again.
+          </p>
+        )}
 
         <form 
           className={styles.form}
           action={async (formData) => {
             "use server"
-            await signIn("credentials", formData)
+            try {
+              await signIn("credentials", {
+                ...Object.fromEntries(formData),
+                redirectTo: "/" // The middleware will correctly route them after login
+              })
+            } catch (error: unknown) {
+              // NextAuth v5 throws an error object with type 'CredentialsSignin'
+              const authError = error as { type?: string; name?: string };
+              if (authError?.type === "CredentialsSignin" || authError?.name === "CredentialsSignin") {
+                redirect("/?error=invalid");
+              }
+              // If it's a redirect error (NEXT_REDIRECT) or any other error, rethrow it
+              throw error;
+            }
           }}
         >
           <div className={styles.inputGroup}>

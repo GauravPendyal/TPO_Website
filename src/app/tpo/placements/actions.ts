@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { sendPlacementAlert } from "@/lib/email";
+import { sendTelegramAlert } from "@/lib/telegram";
 
 export async function addPlacement(formData: FormData) {
   const session = await auth();
@@ -38,6 +40,11 @@ export async function addPlacement(formData: FormData) {
       dateOffered,
     },
   });
+
+  await Promise.all([
+    sendPlacementAlert(session.user.email!, student.name, companyName),
+    sendTelegramAlert(`New placement confirmed: ${student.name} at ${companyName} as ${role}`),
+  ]);
 
   revalidatePath("/tpo/placements");
   revalidatePath("/tpo/finance"); // Revenue might change

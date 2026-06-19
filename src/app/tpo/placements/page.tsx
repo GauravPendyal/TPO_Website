@@ -2,7 +2,7 @@ import styles from "../page.module.css";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import Link from "next/link";
 
 export default async function PlacementsPage() {
@@ -27,26 +27,58 @@ export default async function PlacementsPage() {
 
   return (
     <div className={styles.dashboard}>
-      <div className={styles.welcome} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className={styles.welcome} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
         <div>
           <h1>Placement Tracking</h1>
-          <p>Monitor your students' job offers and success rates.</p>
+          <p>Monitor your students&apos; job offers and success rates.</p>
         </div>
-        <Link href="/tpo/placements/add" style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          background: "hsl(var(--brand-primary))",
-          color: "white",
-          padding: "0.75rem 1.25rem",
-          borderRadius: "8px",
-          fontWeight: 600,
-          textDecoration: "none",
-          transition: "opacity 0.2s ease"
-        }}>
-          <Plus size={18} />
-          Add Placement
-        </Link>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <Link href="/api/reports/placements?format=csv" style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            background: "hsl(var(--bg-tertiary))",
+            color: "hsl(var(--text-primary))",
+            padding: "0.75rem 1rem",
+            borderRadius: "8px",
+            fontWeight: 600,
+            textDecoration: "none",
+            border: "1px solid hsl(var(--border-subtle))"
+          }}>
+            <Download size={18} />
+            CSV
+          </Link>
+          <Link href="/api/reports/placements?format=pdf" style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            background: "hsl(var(--bg-tertiary))",
+            color: "hsl(var(--text-primary))",
+            padding: "0.75rem 1rem",
+            borderRadius: "8px",
+            fontWeight: 600,
+            textDecoration: "none",
+            border: "1px solid hsl(var(--border-subtle))"
+          }}>
+            <Download size={18} />
+            PDF
+          </Link>
+          <Link href="/tpo/placements/add" style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            background: "hsl(var(--brand-primary))",
+            color: "white",
+            padding: "0.75rem 1.25rem",
+            borderRadius: "8px",
+            fontWeight: 600,
+            textDecoration: "none",
+            transition: "opacity 0.2s ease"
+          }}>
+            <Plus size={18} />
+            Add Placement
+          </Link>
+        </div>
       </div>
 
       <div className={styles.section}>

@@ -1,4 +1,5 @@
-import { GraduationCap, Briefcase, IndianRupee, FileText } from "lucide-react";
+import { Briefcase, Download, FileText, GraduationCap, IndianRupee } from "lucide-react";
+import Link from "next/link";
 import styles from "./page.module.css";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -6,11 +7,11 @@ import { prisma } from "@/lib/prisma";
 export default async function TPODashboard() {
   const session = await auth();
   const collegeId = session?.user?.collegeId;
-
-  // We only fetch stats for THIS college if collegeId exists
   const whereClause = collegeId ? { collegeId } : {};
+  const renewalCutoff = new Date();
+  renewalCutoff.setDate(renewalCutoff.getDate() + 30);
 
-  const [studentsCount, placementsCount, students] = await Promise.all([
+  const [studentsCount, placementsCount, students, college, placements, expiringMous] = await Promise.all([
     prisma.student.count({ where: whereClause }),
     prisma.placement.count({ where: { student: whereClause } }),
     prisma.student.findMany({
@@ -18,11 +19,21 @@ export default async function TPODashboard() {
       take: 5,
       orderBy: { createdAt: "desc" },
     }),
+    collegeId ? prisma.college.findUnique({ where: { id: collegeId } }) : null,
+    prisma.placement.findMany({ where: { student: whereClause } }),
+    collegeId
+      ? prisma.mou.findMany({
+          where: {
+            collegeId,
+            endDate: {
+              lte: renewalCutoff,
+            },
+          },
+          orderBy: { endDate: "asc" },
+        })
+      : [],
   ]);
 
-  const college = collegeId ? await prisma.college.findUnique({ where: { id: collegeId } }) : null;
-  const placements = await prisma.placement.findMany({ where: { student: whereClause } });
-  
   const totalSalaryLPA = placements.reduce((sum, p) => sum + (p.salary || 0), 0);
   const revenueShare = college?.revenueSharePercentage || 0;
   const totalRevenue = totalSalaryLPA * 100000 * (revenueShare / 100);
@@ -31,7 +42,7 @@ export default async function TPODashboard() {
     { label: "Total Students", value: studentsCount, icon: GraduationCap },
     { label: "Successful Placements", value: placementsCount, icon: Briefcase },
     { label: "Active Offers", value: placementsCount.toString(), icon: FileText },
-    { label: "Total Revenue Generated", value: `₹${totalRevenue.toLocaleString('en-IN')}`, icon: IndianRupee },
+    { label: "Total Revenue Generated", value: `Rs. ${totalRevenue.toLocaleString("en-IN")}`, icon: IndianRupee },
   ];
 
   return (
@@ -40,6 +51,18 @@ export default async function TPODashboard() {
         <h1>TPO Overview</h1>
         <p>Manage your students, track placements, and monitor generated revenue.</p>
       </div>
+
+      {expiringMous.length > 0 && (
+        <div className={styles.section} style={{ borderLeft: "4px solid hsl(var(--warning))" }}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>MOU Renewal Alert</h3>
+          </div>
+          <p style={{ color: "hsl(var(--text-secondary))" }}>
+            {expiringMous.length} agreement(s) expire within 30 days. Earliest renewal date:{" "}
+            {expiringMous[0].endDate.toLocaleDateString()}.
+          </p>
+        </div>
+      )}
 
       <div className={styles.statsGrid}>
         {stats.map((stat, index) => (
@@ -91,6 +114,37 @@ export default async function TPODashboard() {
           </tbody>
         </table>
       </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h3 className={styles.sectionTitle}>Reports</h3>
+        </div>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <Link href="/api/reports/placements?format=csv" style={reportLinkStyle}>
+            <Download size={18} />
+            Placement CSV
+          </Link>
+          <Link href="/api/reports/placements?format=pdf" style={reportLinkStyle}>
+            <Download size={18} />
+            Placement PDF
+          </Link>
+          <Link href="/api/reports/cohort" style={reportLinkStyle}>
+            <Download size={18} />
+            Cohort CSV
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
+
+const reportLinkStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.5rem",
+  background: "hsl(var(--bg-tertiary))",
+  padding: "0.75rem 1rem",
+  borderRadius: "8px",
+  border: "1px solid hsl(var(--border-subtle))",
+  fontWeight: 600,
+} as const;

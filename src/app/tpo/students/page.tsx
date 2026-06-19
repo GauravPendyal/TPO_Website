@@ -83,7 +83,7 @@ export default async function StudentsPage() {
             {students.length === 0 && (
               <tr>
                 <td colSpan={5} style={{ textAlign: "center", color: "var(--text-secondary)" }}>
-                  No students found. Click "Add Student" to begin.
+                  No students found. Click &quot;Add Student&quot; to begin.
                 </td>
               </tr>
             )}

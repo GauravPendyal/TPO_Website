@@ -2,6 +2,11 @@ import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 declare module "next-auth" {
+  interface User {
+    role: string
+    collegeId: string | null
+  }
+
   interface Session {
     user: {
       id: string
@@ -54,8 +59,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role
-        token.collegeId = (user as any).collegeId
+        token.role = user.role
+        token.collegeId = user.collegeId
       }
       return token
     },

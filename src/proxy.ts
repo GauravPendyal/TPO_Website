@@ -1,5 +1,4 @@
 import { auth } from "@/auth"
-import { NextResponse } from "next/server"
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth
@@ -12,20 +11,18 @@ export default auth((req) => {
   if (isLoggedIn) {
     const role = req.auth?.user?.role
 
-    // Redirect logged in users away from login page
     if (pathname === "/") {
       if (role === "SUPER_ADMIN") {
         return Response.redirect(new URL("/admin", req.nextUrl))
-      } else {
-        return Response.redirect(new URL("/tpo", req.nextUrl))
       }
+
+      return Response.redirect(new URL("/tpo", req.nextUrl))
     }
 
-    // Role-based protection
     if (pathname.startsWith("/admin") && role !== "SUPER_ADMIN") {
       return Response.redirect(new URL("/tpo", req.nextUrl))
     }
-    
+
     if (pathname.startsWith("/tpo") && role !== "TPO_ADMIN" && role !== "TPO_STAFF") {
       return Response.redirect(new URL("/admin", req.nextUrl))
     }
