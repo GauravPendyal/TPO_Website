@@ -1,14 +1,15 @@
-import { PrismaClient, Role, PartnershipType, CollegeStatus, ProgramType } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+import { PrismaLibSql } from '@prisma/adapter-libsql'
 // Using require to avoid module issues if tsconfig isn't set up perfectly for node yet
 const { hash } = require('bcryptjs')
+const dotenv = require('dotenv')
+dotenv.config()
 
-const { Pool } = require('pg')
-const { PrismaPg } = require('@prisma/adapter-pg')
-
-const connectionString = process.env.DATABASE_URL
-const pool = new Pool({ connectionString })
-const adapter = new PrismaPg(pool)
+const adapter = new PrismaLibSql({
+  url: process.env.DATABASE_URL || 'file:./dev.db',
+})
 const prisma = new PrismaClient({ adapter })
+
 
 async function main() {
   console.log('Seeding the database...')
@@ -31,7 +32,7 @@ async function main() {
       name: 'Super Admin',
       email: 'admin@skilltank.com',
       passwordHash,
-      role: Role.SUPER_ADMIN,
+      role: 'SUPER_ADMIN',
     },
   })
   console.log(`Created admin user: ${admin.email}`)
@@ -41,9 +42,9 @@ async function main() {
     data: {
       name: 'Global Tech University',
       university: 'GTU',
-      partnershipType: PartnershipType.CRT,
+      partnershipType: 'CRT',
       revenueSharePercentage: 20.0,
-      status: CollegeStatus.APPROVED,
+      status: 'APPROVED',
     },
   })
 
@@ -51,9 +52,9 @@ async function main() {
     data: {
       name: 'National Institute of Engineering',
       university: 'NIE',
-      partnershipType: PartnershipType.FDP,
+      partnershipType: 'FDP',
       revenueSharePercentage: 15.0,
-      status: CollegeStatus.APPROVED,
+      status: 'APPROVED',
     },
   })
 
@@ -61,9 +62,9 @@ async function main() {
     data: {
       name: 'Future Sciences College',
       university: 'FSC',
-      partnershipType: PartnershipType.EXTERNAL,
+      partnershipType: 'EXTERNAL',
       revenueSharePercentage: 10.0,
-      status: CollegeStatus.APPROVED,
+      status: 'APPROVED',
     },
   })
   console.log('Created 3 dummy colleges')
@@ -74,7 +75,7 @@ async function main() {
       name: 'TPO Admin 1',
       email: 'tpo1@gtu.edu',
       passwordHash,
-      role: Role.TPO_ADMIN,
+      role: 'TPO_ADMIN',
       collegeId: c1.id,
     },
   })
@@ -84,7 +85,7 @@ async function main() {
       name: 'TPO Admin 2',
       email: 'tpo2@nie.edu',
       passwordHash,
-      role: Role.TPO_ADMIN,
+      role: 'TPO_ADMIN',
       collegeId: c2.id,
     },
   })
@@ -94,7 +95,7 @@ async function main() {
       name: 'TPO Admin 3',
       email: 'tpo3@fsc.edu',
       passwordHash,
-      role: Role.TPO_ADMIN,
+      role: 'TPO_ADMIN',
       collegeId: c3.id,
     },
   })
@@ -104,21 +105,21 @@ async function main() {
   const p1 = await prisma.program.create({
     data: {
       name: 'Full Stack Web Development Bootcamp',
-      type: ProgramType.STUDENT,
+      type: 'STUDENT',
     },
   })
 
   const p2 = await prisma.program.create({
     data: {
       name: 'Advanced AI and Machine Learning',
-      type: ProgramType.STUDENT,
+      type: 'STUDENT',
     },
   })
 
   const p3 = await prisma.program.create({
     data: {
       name: 'Faculty Pedagogy Enhancement Program',
-      type: ProgramType.FDP,
+      type: 'FDP',
     },
   })
   console.log('Created 3 dummy programs')

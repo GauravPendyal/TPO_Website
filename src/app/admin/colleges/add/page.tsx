@@ -1,5 +1,5 @@
 import { addCollege } from "../actions";
-import styles from "../../tpo/students/add/page.module.css";
+import styles from "../../../tpo/students/add/page.module.css";
 import dashboardStyles from "../../page.module.css";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
